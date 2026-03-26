@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <title>RPG - Dragon Repeller</title>
+    <link rel="stylesheet" href="styles.css">
+   
+  </head>
+  <body>
+    <div id="auth">
+      <h2>Dragon Repeller</h2>
+
+      <div class="auth-section">
+        <h3>Iniciar sesión</h3>
+        <input id="loginUsername" type="text" placeholder="Usuario" autocomplete="username" />
+        <input id="loginPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
+        <button id="loginBtn">Entrar</button>
+      </div>
+
+      <div class="auth-section">
+        <h3>Registro</h3>
+        <input id="registerUsername" type="text" placeholder="Usuario" autocomplete="username" />
+        <input id="registerPassword" type="password" placeholder="Contraseña (mín. 6)" autocomplete="new-password" />
+        <button id="registerBtn">Crear cuenta</button>
+      </div>
+
+      <div id="authMessage"></div>
+    </div>
+
+    <div id="game" style="display:none;">
+        <div id="stats">
+         <span class="stat">XP: <strong><span id="xpText">0</span></strong></span>
+<span class="stat">Health: <strong><span id="healthText">100</span></strong></span>
+<span class="stat">Gold: <strong><span id="goldText">50</span></strong></span>
+</div>
+      <div id="controls">
+      <button id="button1">Ir a la tienda.</button>
+      <button id="button2">Ir a la cueva</button>
+      <button id="button3">Luchar contra el dragón</button>
+      
+      
+      
+      <div id="monsterStats">
+      <span class="stat">Monster name: <strong><span id="monsterName"></span></strong></span>
+      <span class="stat">Health: <strong><span id="monsterHealth"></span></strong></span>
+      <div id="text">Bienvenido a Dragon Repeller. 
+        Debes derrotar al dragón que está impidiendo que la gente salga del pueblo. 
+        Estás en la plaza del pueblo. ¿A dónde quieres ir? 
+        Usa los botones de arriba.</div>
+    </div></div>
+     <script src="./script.js"></script>
+  </body>
+</html>
