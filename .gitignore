@@ -1,0 +1,14 @@
+# Dependencias
+node_modules/
+backend/node_modules/
+
+# Base de datos local (se genera al ejecutar)
+backend/data.sqlite
+backend/data.sqlite-shm
+backend/data.sqlite-wal
+data.sqlite
+data.sqlite-shm
+data.sqlite-wal
+
+# Entornos / secretos (por si luego añades un .env)
+.env

@@ -77,3 +77,35 @@ button {
 button:hover {
   background-image: linear-gradient(#ffd76f, #fca72d);
 }
+
+#auth {
+  max-width: 600px;
+  margin: 50px auto;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+  padding: 20px;
+  color: #fff;
+}
+
+.auth-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.auth-section input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 2px solid rgba(254, 172, 50, 0.8);
+  background: rgba(10, 10, 35, 0.9);
+  color: #fff;
+}
+
+#authMessage {
+  margin-top: 10px;
+  font-weight: bold;
+  color: #ffd76f;
+  white-space: pre-wrap;
+}
