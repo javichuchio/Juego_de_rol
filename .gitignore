@@ -12,3 +12,10 @@ data.sqlite-wal
 
 # Entornos / secretos (por si luego añades un .env)
 .env
+
+# React Native local/build artifacts
+mobile/react-native/JuegoDeRolMobile/.bundle/
+mobile/react-native/JuegoDeRolMobile/android/.gradle/
+mobile/react-native/JuegoDeRolMobile/android/.cxx/
+mobile/react-native/JuegoDeRolMobile/android/app/.cxx/
+mobile/react-native/JuegoDeRolMobile/android/gradle/gradle-daemon-jvm.properties

@@ -5,6 +5,7 @@ let currentWeaponIndex = 0;
 let fighting;
 let monsterHealth;
 let inventory = ["palo"];
+const FLEE_SUCCESS_CHANCE = 0.4;
 
 // Estado persistente del jugador (se guarda en BD)
 let currentLocationKey = "town";
@@ -188,7 +189,7 @@ function fightMonster(index) {
 
   button1.onclick = attack;
   button2.onclick = dodge;
-  button3.onclick = goTown;
+  button3.onclick = flee;
 }
 
 function attack() {
@@ -224,6 +225,28 @@ function dodge() {
     health -= monsters[fighting].level * 10;
     healthText.innerText = health;
     text.innerText = "Fallaste el esquive y recibiste daño.";
+    if (health <= 0) {
+      lose();
+    }
+  }
+
+  scheduleSave();
+}
+
+function flee() {
+  if (wonDragon || gameOver || fighting === undefined) return;
+
+  const escaped = Math.random() < FLEE_SUCCESS_CHANCE;
+  if (escaped) {
+    text.innerText = "Conseguiste huir del combate.";
+    monsterStats.style.display = "none";
+    update(locations[0]);
+  } else {
+    const monster = monsters[fighting];
+    const damage = Math.max(1, Math.floor(monster.level * 5));
+    health -= damage;
+    healthText.innerText = health;
+    text.innerText = `No pudiste huir. ${monster.name} te golpeó por ${damage}.`;
     if (health <= 0) {
       lose();
     }
