@@ -37,6 +37,7 @@ const loginBtn = document.querySelector("#loginBtn");
 const registerUsernameEl = document.querySelector("#registerUsername");
 const registerPasswordEl = document.querySelector("#registerPassword");
 const registerBtn = document.querySelector("#registerBtn");
+const logoutBtn = document.querySelector("#logoutBtn");
 
 const weapons = [
   { name: "Palo", damage: 5, price: 0 },
@@ -79,6 +80,14 @@ const locations = [
 
 function update(location) {
   currentLocationKey = location.key || "town";
+  if (currentLocationKey === "store") {
+    setSceneBackground("store");
+  } else if (currentLocationKey === "cave") {
+    setSceneBackground("cave");
+  } else {
+    setSceneBackground("town");
+  }
+
   button1.innerText = location["button text"][0];
   button2.innerText = location["button text"][1];
   button3.innerText = location["button text"][2];
@@ -160,6 +169,14 @@ function fightDragon() {
 function fightMonster(index) {
   fighting = index;
   monsterHealth = monsters[index].health;
+  if (index === 0) {
+    setSceneBackground("beast");
+  } else if (index === 1) {
+    setSceneBackground("walker");
+  } else {
+    setSceneBackground("dragon");
+  }
+
   monsterStats.style.display = "block";
   monsterName.innerText = monsters[index].name;
   monsterHealthText.innerText = monsterHealth;
@@ -251,6 +268,23 @@ function lose() {
 
 // --- Persistencia (BD) / Auth ---
 const API_BASE = "/api";
+const SCENE_BACKGROUNDS = {
+  town: "/assets/town.png",
+  store: "/assets/store.png",
+  cave: "/assets/cave.png",
+  beast: "/assets/beast.png",
+  walker: "/assets/walker.png",
+  dragon: "/assets/dragon.png",
+};
+
+function setSceneBackground(sceneKey) {
+  const sceneUrl = SCENE_BACKGROUNDS[sceneKey] || "";
+  if (sceneUrl) {
+    document.body.style.backgroundImage = `url("${sceneUrl}")`;
+  } else {
+    document.body.style.backgroundImage = "";
+  }
+}
 
 function locationByKey(key) {
   return locations.find((l) => l.key === key) || locations[0];
@@ -259,11 +293,26 @@ function locationByKey(key) {
 function showAuth() {
   if (authEl) authEl.style.display = "block";
   if (gameEl) gameEl.style.display = "none";
+  setSceneBackground("town");
 }
 
 function showGame() {
   if (authEl) authEl.style.display = "none";
   if (gameEl) gameEl.style.display = "flex";
+}
+
+function logout() {
+  authToken = null;
+  localStorage.removeItem("rpg_token");
+  if (saveTimeoutId) {
+    clearTimeout(saveTimeoutId);
+    saveTimeoutId = null;
+  }
+
+  if (loginPasswordEl) loginPasswordEl.value = "";
+  if (registerPasswordEl) registerPasswordEl.value = "";
+  setAuthMessage("Sesión cerrada. Inicia con otra cuenta.");
+  showAuth();
 }
 
 function setAuthMessage(message, isError = false) {
@@ -321,6 +370,7 @@ function renderFromState() {
   fighting = undefined;
 
   if (wonDragon) {
+    setSceneBackground("town");
     text.innerText = `¡Has derrotado al Dragón! ¡El pueblo está a salvo! ¡Felicidades, héroe! 🎉`;
     button1.innerText = "Jugar de nuevo";
     button2.style.display = "none";
@@ -330,6 +380,7 @@ function renderFromState() {
   }
 
   if (gameOver) {
+    setSceneBackground("town");
     text.innerText = "¡Has muerto! El dragón sigue reinando. GAME OVER.";
     button1.innerText = "Reiniciar";
     button2.style.display = "none";
@@ -447,6 +498,10 @@ registerBtn.addEventListener("click", async () => {
     setAuthMessage(e && e.message ? e.message : "No se pudo registrar.", true);
   }
 });
+
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", logout);
+}
 
 // Arranque
 if (authToken) {

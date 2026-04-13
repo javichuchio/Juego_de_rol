@@ -1,48 +1,73 @@
-body {
-  background-image: url("Dragon.jpg");
-  background-repeat: no-repeat;
-  background-size: cover;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin: 0;
-  padding: 0;
-  color: #fff;
+* {
+  box-sizing: border-box;
 }
 
+body {
+  background-image: url("assets/town.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
+  background-color: #060b14;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  margin: 0;
+  padding: 18px;
+  color: #fff;
+  min-height: 100vh;
+}
+
+#auth,
 #game {
-  max-width: 600px;
-  margin: 50px auto;
+  width: min(920px, 95vw);
+  margin: 0 auto 18px;
   background: rgba(0, 0, 0, 0.8);
-  border-radius: 10px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+  border-radius: 12px;
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.65);
   padding: 20px;
 }
 
-#text {
-  background-color: rgba(10, 10, 35, 0.9);
-  color: #ffffff;
-  padding: 15px;
-  margin-top: 15px;
-  border-radius: 5px;
-  font-size: 1.1em;
-  line-height: 1.5em;
+#auth {
+  margin: auto auto 18px;
 }
 
-#controls, #stats, #monsterStats {
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 5px;
+#game {
+  position: relative;
+  width: min(640px, 86vw);
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.side-logout-btn {
+  position: static;
+  align-self: flex-end;
+  width: auto;
+  min-width: 165px;
+  margin-bottom: 4px;
+}
+
+#stats,
+#controls,
+#monsterStats {
+  padding: 12px;
+  border-radius: 8px;
 }
 
 #stats {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.12);
   display: flex;
   justify-content: space-between;
-  font-size: 1em;
-  font-weight: bold;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 #controls {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.06);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -50,11 +75,24 @@ body {
 
 #monsterStats {
   background-color: rgba(199, 13, 13, 0.9);
-  color: #ffffff;
+  color: #fff;
   display: none;
-  flex-direction: column;
-  gap: 5px;
-  font-weight: bold;
+  font-weight: 700;
+}
+
+#monsterStats .stat {
+  display: block;
+  margin-bottom: 6px;
+}
+
+#text {
+  background-color: rgba(10, 10, 35, 0.9);
+  color: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 1.06rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
 }
 
 .stat {
@@ -63,39 +101,31 @@ body {
 
 button {
   cursor: pointer;
-  padding: 10px 15px;
+  width: 100%;
+  padding: 12px 15px;
   background-color: #feac32;
   background-image: linear-gradient(#fecc4c, #ffac33);
   border: 2px solid #feac32;
   border-radius: 8px;
-  font-size: 1em;
-  font-weight: bold;
+  font-size: 1.03rem;
+  font-weight: 700;
   color: #0a0a23;
-  transition: background 0.3s ease;
+  transition: background 0.25s ease;
 }
 
 button:hover {
   background-image: linear-gradient(#ffd76f, #fca72d);
 }
 
-#auth {
-  max-width: 600px;
-  margin: 50px auto;
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: 10px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
-  padding: 20px;
-  color: #fff;
-}
-
 .auth-section {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 10px 0;
+  padding: 8px 0;
 }
 
 .auth-section input {
+  width: 100%;
   padding: 10px 12px;
   border-radius: 8px;
   border: 2px solid rgba(254, 172, 50, 0.8);
@@ -105,7 +135,95 @@ button:hover {
 
 #authMessage {
   margin-top: 10px;
-  font-weight: bold;
+  font-weight: 700;
   color: #ffd76f;
   white-space: pre-wrap;
+}
+
+@media (max-width: 980px) {
+  body {
+    padding: 12px;
+    background-position: center top;
+  }
+
+  #auth,
+  #game {
+    width: min(660px, 92vw);
+    margin: 0 auto 14px;
+    padding: 16px;
+  }
+
+  .side-logout-btn {
+    width: 100%;
+    min-width: 0;
+    align-self: stretch;
+  }
+
+  #stats {
+    font-size: 0.96rem;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: 10px;
+    background-attachment: scroll;
+  }
+
+  #auth,
+  #game {
+    margin: 0 auto 10px;
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  #stats {
+    font-size: 0.95rem;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  button {
+    font-size: 0.97rem;
+    padding: 11px 12px;
+  }
+
+  #text {
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+}
+
+@media (min-width: 1700px) {
+  body {
+    padding: 28px;
+  }
+
+  #auth,
+  #game {
+    width: min(760px, 56vw);
+    padding: 22px;
+    border-radius: 14px;
+  }
+
+  #stats,
+  #controls,
+  #monsterStats,
+  #text {
+    padding: 16px;
+  }
+
+  #stats {
+    font-size: 1.12rem;
+  }
+
+  button {
+    font-size: 1.12rem;
+    padding: 14px 18px;
+  }
+
+  #text {
+    font-size: 1.16rem;
+    line-height: 1.5;
+  }
 }
