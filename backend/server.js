@@ -12,6 +12,10 @@ app.use(express.json());
 // Sirve el front estático (index.html, script.js, estilos, etc.)
 app.use(express.static(path.join(__dirname, "..")));
 
+app.get("/api/health", (_req, res) => {
+  return res.json({ ok: true });
+});
+
 app.post("/api/auth/register", async (req, res) => {
   try {
     const { username, password } = req.body || {};
