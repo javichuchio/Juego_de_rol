@@ -1,6 +1,7 @@
 * {
   box-sizing: border-box;
 }
+/* v2.1 - Updated message styles */
 
 body {
   background-image: url("assets/town.png");
@@ -140,6 +141,31 @@ button:hover {
   white-space: pre-wrap;
 }
 
+#syncStatus {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.1);
+  border-left: 4px solid #88ff88;
+  min-height: 20px;
+  transition: all 0.3s ease;
+}
+
+#syncStatus:empty {
+  display: none;
+}
+
+#authMessage {
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-left: 4px solid #ffd76f;
+  transition: all 0.3s ease;
+  min-height: 20px;
+}
+
 @media (max-width: 980px) {
   body {
     padding: 12px;
@@ -226,4 +252,65 @@ button:hover {
     font-size: 1.16rem;
     line-height: 1.5;
   }
+}
+
+/* Modal personalizado */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: linear-gradient(135deg, rgba(20, 20, 50, 0.95), rgba(30, 10, 60, 0.95));
+  border: 2px solid #feac32;
+  border-radius: 12px;
+  padding: 25px 30px;
+  min-width: 320px;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.7), 0 0 15px rgba(254, 172, 50, 0.3);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-content p {
+  color: #ffd76f;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+.modal-btn {
+  margin-top: 15px;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  background-image: linear-gradient(#fecc4c, #ffac33);
+  color: #0a0a23;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-btn:hover {
+  background-image: linear-gradient(#ffd76f, #fca72d);
+  transform: scale(1.05);
 }

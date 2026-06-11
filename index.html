@@ -25,6 +25,7 @@
     </div>
 
     <div id="authMessage"></div>
+    <div id="syncStatus"></div>
   </div>
 
   <div id="game" style="display:none;">
@@ -52,6 +53,14 @@
       Debes derrotar al dragón que está impidiendo que la gente salga del pueblo.
       Estás en la plaza del pueblo. ¿A dónde quieres ir?
       Usa los botones de arriba.
+    </div>
+  </div>
+
+  <!-- Modal de mensaje personalizado -->
+  <div id="modalMensaje" class="modal">
+    <div class="modal-content">
+      <p id="textoMensaje"></p>
+      <button class="modal-btn" onclick="cerrarModal()">Aceptar</button>
     </div>
   </div>
 

@@ -16,6 +16,23 @@ let gameOver = false;
 let authToken = localStorage.getItem("rpg_token") || null;
 let saveTimeoutId = null;
 
+// Modal functions
+function mostrarMensaje(texto) {
+  const modal = document.getElementById("modalMensaje");
+  const textoEl = document.getElementById("textoMensaje");
+  if (modal && textoEl) {
+    textoEl.textContent = texto;
+    modal.style.display = "flex";
+  }
+}
+
+function cerrarModal() {
+  const modal = document.getElementById("modalMensaje");
+  if (modal) {
+    modal.style.display = "none";
+  }
+}
+
 const button1 = document.querySelector("#button1");
 const button2 = document.querySelector("#button2");
 const button3 = document.querySelector("#button3");
@@ -39,6 +56,7 @@ const registerUsernameEl = document.querySelector("#registerUsername");
 const registerPasswordEl = document.querySelector("#registerPassword");
 const registerBtn = document.querySelector("#registerBtn");
 const logoutBtn = document.querySelector("#logoutBtn");
+const syncStatusEl = document.querySelector("#syncStatus");
 
 const weapons = [
   { name: "Palo", damage: 5, price: 0 },
@@ -131,7 +149,7 @@ function buyHealth() {
     healthText.innerText = health;
     scheduleSave();
   } else {
-    alert("No tienes suficiente oro para comprar salud.");
+    mostrarMensaje("No tienes suficiente oro para comprar salud.");
   }
 }
 
@@ -148,10 +166,10 @@ function buyWeapon() {
       goldText.innerText = gold;
       scheduleSave();
     } else {
-      text.innerText = "No tienes suficiente oro para comprar un arma.";
+      mostrarMensaje("No tienes suficiente oro para comprar un arma.");
     }
   } else {
-    text.innerText = "Ya tienes el arma más poderosa!";
+    mostrarMensaje("Ya tienes el arma más poderosa!");
   }
 }
 
@@ -327,6 +345,7 @@ function showGame() {
 function logout() {
   authToken = null;
   localStorage.removeItem("rpg_token");
+  // DO NOT clear local progress here - keep it for next session to sync
   if (saveTimeoutId) {
     clearTimeout(saveTimeoutId);
     saveTimeoutId = null;
@@ -342,6 +361,12 @@ function setAuthMessage(message, isError = false) {
   if (!authMessageEl) return;
   authMessageEl.innerText = message || "";
   authMessageEl.style.color = isError ? "#ff8080" : "#ffd76f";
+}
+
+function showSyncStatus(message, isWarn = false) {
+  if (!syncStatusEl) return;
+  syncStatusEl.innerText = message || "";
+  syncStatusEl.style.color = isWarn ? "#ff8080" : "#88ff88";
 }
 
 async function apiFetch(path, options = {}) {
@@ -383,6 +408,63 @@ function buildProgressPayload() {
   };
 }
 
+// --- Local persistence helpers (autosave when no auth) ---
+const LOCAL_PROGRESS_KEY = "rpg_local_progress";
+
+function saveLocalProgress() {
+  try {
+    const payload = buildProgressPayload();
+    localStorage.setItem(LOCAL_PROGRESS_KEY, JSON.stringify(payload));
+  } catch (e) {
+    // ignore quota errors
+  }
+}
+
+function loadLocalProgress() {
+  try {
+    const raw = localStorage.getItem(LOCAL_PROGRESS_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed;
+  } catch (e) {
+    return null;
+  }
+}
+
+function clearLocalProgress() {
+  try {
+    localStorage.removeItem(LOCAL_PROGRESS_KEY);
+  } catch (e) {}
+}
+
+async function syncLocalToServer() {
+  const raw = loadLocalProgress();
+  if (!raw) {
+    return true; // Nothing to sync, considered success
+  }
+  if (!authToken) {
+    return false; // Cannot sync without token
+  }
+
+  try {
+    // Upload local progress to server
+    await apiFetch("/progress", {
+      method: "PUT",
+      body: JSON.stringify(raw),
+    });
+    // Success - clear local copy IMMEDIATELY so loadProgress() doesn't use stale local data
+    clearLocalProgress();
+    showSyncStatus("Progreso local sincronizado con el servidor.");
+    console.log("[syncLocalToServer] Success, local progress cleared");
+    return true;
+  } catch (e) {
+    // If sync fails, keep local copy and try later.
+    console.warn("syncLocalToServer failed", e && e.message ? e.message : e);
+    showSyncStatus("No se pudo sincronizar. Se intentará más tarde.", true);
+    return false;
+  }
+}
+
 function renderFromState() {
   xpText.innerText = xp;
   healthText.innerText = health;
@@ -416,10 +498,10 @@ function renderFromState() {
 }
 
 function applyProgress(progress) {
-  xp = Number(progress.xp) || 0;
-  health = Number(progress.health) || 100;
-  gold = Number(progress.gold) || 50;
-  currentWeaponIndex = Number(progress.currentWeaponIndex) || 0;
+  xp = Number.isFinite(progress.xp) ? progress.xp : 0;
+  health = Number.isFinite(progress.health) ? progress.health : 100;
+  gold = Number.isFinite(progress.gold) ? progress.gold : 50;
+  currentWeaponIndex = Number.isFinite(progress.currentWeaponIndex) ? progress.currentWeaponIndex : 0;
   inventory = Array.isArray(progress.inventory) ? progress.inventory : ["palo"];
   currentLocationKey = typeof progress.location === "string" ? progress.location : "town";
   wonDragon = !!progress.wonDragon;
@@ -429,17 +511,40 @@ function applyProgress(progress) {
 }
 
 async function loadProgress() {
-  const data = await apiFetch("/progress", { method: "GET" });
-  applyProgress(data.progress);
+  // PRIORITY: If there's unsync'd local progress, use it (it's more recent)
+  const local = loadLocalProgress();
+  if (local) {
+    console.log("[loadProgress] Using local unsync'd progress", local);
+    applyProgress(local);
+    return;
+  }
+  
+  // Otherwise load from server
+  try {
+    const data = await apiFetch("/progress", { method: "GET" });
+    console.log("[loadProgress] Loaded from server", data.progress);
+    applyProgress(data.progress);
+  } catch (e) {
+    console.warn("[loadProgress] Failed to load from server, using defaults", e);
+    // If server load fails, use hardcoded defaults
+    applyProgress({
+      xp: 0, health: 100, gold: 50, currentWeaponIndex: 0,
+      inventory: ["palo"], location: "town", wonDragon: false, gameOver: false
+    });
+  }
 }
 
 function scheduleSave() {
+  // Always persist locally first so progress isn't lost.
+  saveLocalProgress();
+
   if (!authToken) return;
+
   if (saveTimeoutId) clearTimeout(saveTimeoutId);
   saveTimeoutId = setTimeout(() => {
     saveTimeoutId = null;
     saveProgress().catch(() => {
-      // Si falla (por ejemplo, token expirado), no bloqueamos el juego.
+      // If server save fails (token expired etc), keep local copy.
     });
   }, 400);
 }
@@ -489,6 +594,13 @@ loginBtn.addEventListener("click", async () => {
     localStorage.setItem("rpg_token", authToken);
     setAuthMessage("Sesión iniciada correctamente.");
     showGame();
+    // Try to sync any local progress saved while unauthenticated,
+    // then load server progress (which now has the synced data or original server state).
+    try {
+      await syncLocalToServer();
+    } catch (e) {
+      console.warn("Sync failed on login, proceeding to load from server", e);
+    }
     await loadProgress();
   } catch (e) {
     setAuthMessage(e && e.message ? e.message : "No se pudo iniciar sesión.", true);
@@ -516,6 +628,12 @@ registerBtn.addEventListener("click", async () => {
     localStorage.setItem("rpg_token", authToken);
     setAuthMessage("Cuenta creada. Bienvenido.");
     showGame();
+    // If the user had local progress, sync it to the server first.
+    try {
+      await syncLocalToServer();
+    } catch (e) {
+      console.warn("Sync failed on register, proceeding to load from server", e);
+    }
     await loadProgress();
   } catch (e) {
     setAuthMessage(e && e.message ? e.message : "No se pudo registrar.", true);
@@ -529,14 +647,37 @@ if (logoutBtn) {
 // Arranque
 if (authToken) {
   showGame();
-  loadProgress()
-    .catch((e) => {
+  // IMPORTANT: Sync FIRST (send local progress to server), THEN load
+  (async () => {
+    try {
+      const syncSuccess = await syncLocalToServer();
+      console.log("[startup] Sync result:", syncSuccess);
+    } catch (e) {
+      console.warn("[startup] Sync failed", e);
+    }
+    try {
+      await loadProgress();
+    } catch (e) {
       // Token inválido/expirado
       authToken = null;
       localStorage.removeItem("rpg_token");
       setAuthMessage(e && e.message ? e.message : "Sesión expirada, inicia sesión de nuevo.", true);
       showAuth();
-    });
+    }
+  })();
 } else {
   showAuth();
 }
+
+// On load, if there's local progress and no auth, inform the user.
+(() => {
+  const local = loadLocalProgress();
+  if (local && !authToken) {
+    showSyncStatus("Progreso guardado localmente. Inicia sesión para sincronizar.", true);
+  } else if (local && authToken) {
+    // If local progress exists and we're authenticated, try to sync.
+    syncLocalToServer().catch(() => {
+      showSyncStatus("No se pudo sincronizar automáticamente.", true);
+    });
+  }
+})();
